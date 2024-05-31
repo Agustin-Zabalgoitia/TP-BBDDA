@@ -33,7 +33,7 @@ DNI			Nombre
 */
 
 --Creación de la base de datos con el nombre indicado por la consigna
---USE agustin
+--USE master
 --DROP DATABASE Com2900G06
 
 CREATE DATABASE Com2900G06
@@ -55,7 +55,7 @@ GO
 --Nota en general: ¿los id deberían ser Identity o INT?, de momento los dejo en INT
 
 
-
+--Empieza la creación de las tablas en el esquema Paciente
 CREATE TABLE Paciente.Domicilio (
 	id_domicilio INT,
 	Calle NVARCHAR(50) NOT NULL,
@@ -146,3 +146,74 @@ CREATE TABLE Paciente.Usuario (
 )
 GO
 
+--Empieza la creación de las tablas en el esquema Turno
+CREATE TABLE Turno.Estado_Turno (
+	id_estado INT,
+	Nombre_Estado NVARCHAR(50),
+	CONSTRAINT PK_Estado_Turno_id_estado PRIMARY KEY (id_estado)
+)
+GO
+
+CREATE TABLE Turno.Tipo_Turno (
+	id_tipo_turno INT,
+	Nombre_del_Tipo_de_Turno NVARCHAR(50),
+	CONSTRAINT PK_Tipo_Turno_id_tipo_turno PRIMARY KEY (id_tipo_turno)
+)
+GO
+
+CREATE TABLE Turno.Sede_de_Atencion (
+	id_sede INT,
+	Nombre_de_la_Sede NVARCHAR(50) NOT NULL,
+	Direccion_Sede NVARCHAR(50) NOT NULL,
+	CONSTRAINT PK_Sede_de_Atencion_id_sede PRIMARY KEY (id_sede)
+)
+GO
+
+CREATE TABLE Turno.Especialidad (
+	id_especialidad INT,
+	Nombre_Especialidad NVARCHAR(50) NOT NULL,
+	CONSTRAINT PK_Especialidad_id_especialidad PRIMARY KEY (id_especialidad)
+)
+GO
+
+CREATE TABLE Turno.Medico (
+	id_medico INT,
+	id_especialidad INT,
+	Nombre NVARCHAR(50) NOT NULL,
+	Apellido NVARCHAR(50) NOT NULL,
+	Nro_Matricula INT NOT NULL,
+	CONSTRAINT PK_Medico_id_medico PRIMARY KEY (id_medico),
+	CONSTRAINT FK_Medico_id_especialidad FOREIGN KEY (id_especialidad) REFERENCES Turno.Especialidad(id_especialidad)
+)
+GO
+
+CREATE TABLE Turno.Reserva_de_Turno_Medico (
+	id_turno INT,
+	id_historia_clinica INT NOT NULL,
+	tipo_documento NVARCHAR(50) NOT NULL,
+	num_documento INT NOT NULL,
+	id_estado_turno INT NOT NULL,
+	id_tipo_turno INT NOT NULL,
+	Fecha DATE NOT NULL,
+	Hora TIME NOT NULL,
+	--¿Es necesario guardar la id del médico, su especialidad, y la dirección de atención?
+	--En caso de que sean necesarios se tendrá que añadir a Dias x Sede
+	CONSTRAINT PK_Reserva_de_Turno_Medico_id_turno PRIMARY KEY (id_turno),
+	CONSTRAINT FK_Reserva_de_Turno_Medico_Paciente FOREIGN KEY (id_historia_clinica, tipo_documento, num_documento) REFERENCES Paciente.Paciente(id_historia_clinica, tipo_documento, num_documento)
+)
+GO
+
+--La verdad que no tengo idea de como modelar esta clase
+--¿La fecha y la hora tendría que ser la de la reserva del turno?
+--¿Si ese es el caso entonces hora y fecha deberían ser foreign keys?
+--Si son foreign keys entonces deberían ser primary keys en la reserva
+CREATE TABLE Turno.Dias_x_Sede (
+	id_sede INT NOT NULL,
+	id_medico INT NOT NULL,
+	Dia DATE NOT NULL,
+	Hora_Inicio TIME NOT NULL, --Hora de inicio de los turnos, los turnos duran 15 minutos
+	CONSTRAINT PK_Dias_x_Sede PRIMARY KEY (id_medico, Dia, Hora_Inicio),
+	CONSTRAINT FK_Dias_x_Sede_id_sede FOREIGN KEY (id_sede) REFERENCES Turno.Sede_de_Atencion(id_sede),
+	CONSTRAINT FK_Dias_x_Sede_id_medico FOREIGN KEY (id_medico) REFERENCES Turno.Medico(id_medico),
+)
+GO
