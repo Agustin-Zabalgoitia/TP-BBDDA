@@ -61,7 +61,7 @@ BEGIN
 	WHERE NOT EXISTS(
 		SELECT 1
 		FROM Paciente.Paciente AS tab
-		WHERE temp.tipo_documento = tab.tipo_documento
+		WHERE temp.tipo_documento = tab.tipo_documento COLLATE Modern_Spanish_CI_AI
 		AND temp.num_documento = tab.num_documento
 	)
 
@@ -83,7 +83,7 @@ BEGIN
 	WHERE NOT EXISTS(
 		SELECT 1
 		FROM Paciente.Paciente AS tab
-		WHERE temp.tipo_documento = tab.tipo_documento
+		WHERE temp.tipo_documento = tab.tipo_documento COLLATE Modern_Spanish_CI_AI
 		AND temp.num_documento = tab.num_documento
 	)
 

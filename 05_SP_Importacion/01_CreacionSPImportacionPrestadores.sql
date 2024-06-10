@@ -36,8 +36,8 @@ BEGIN
 	WHERE NOT EXISTS(
 		SELECT 1 
 		FROM HospitalGral.Prestador AS tab
-		WHERE temp.Prestador = tab.Nombre_Prestador
-		AND temp.Plan_Prest = tab.Plan_Prestador
+		WHERE temp.Prestador = tab.Nombre_Prestador COLLATE Modern_Spanish_CI_AI
+		AND temp.Plan_Prest = tab.Plan_Prestador COLLATE Modern_Spanish_CI_AI
 	)
 
 	DROP TABLE #TempPrestadorNuevos;

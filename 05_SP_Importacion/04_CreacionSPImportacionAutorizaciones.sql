@@ -2,7 +2,7 @@ USE Com2900G06
 GO
 
 CREATE OR ALTER PROCEDURE HospitalGral.Autorizacion_estudios_importar_JSON
-	@path NVARCHAR(150)
+	@path NVARCHAR(200)
 AS
 BEGIN
 	
@@ -49,7 +49,7 @@ BEGIN
 		id_Autorizacion, 
 		Area, 
 		Estudio, 
-		(SELECT id_prestador FROM HospitalGral.Prestador p WHERE p.Nombre_Prestador = temp.Prestador AND p.Plan_Prestador = temp.Plan_p ),
+		(SELECT id_prestador FROM HospitalGral.Prestador p WHERE p.Nombre_Prestador = temp.Prestador COLLATE Modern_Spanish_CI_AI AND p.Plan_Prestador = temp.Plan_p COLLATE Modern_Spanish_CI_AI),
 		PorcentCobertura, 
 		Costo, 
 		Autorizacion_req
@@ -57,7 +57,7 @@ BEGIN
 	WHERE NOT EXISTS(
 		SELECT 1 
 		FROM HospitalGral.Autorizacion_Estudios ae
-		WHERE ae.id_Autorizacion = temp.id_Autorizacion
+		WHERE ae.id_Autorizacion = temp.id_Autorizacion COLLATE Modern_Spanish_CI_AI
 	)
 	AND temp.Estudio IS NOT NULL
 	

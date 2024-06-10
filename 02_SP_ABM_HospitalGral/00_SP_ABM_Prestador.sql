@@ -1,3 +1,5 @@
+USE Com2900G06
+
 -- Alta
 
 GO
@@ -37,6 +39,8 @@ BEGIN
 		WHERE id_prestador = @id_prestador;
 
 		print @msj
+
+		--FALTA CANCELAR TODOS LOS TURNOS ASOCIADOS A LOS PACIENTES QUE TENGAN ESE PRESTADOR
 
 	END TRY
 

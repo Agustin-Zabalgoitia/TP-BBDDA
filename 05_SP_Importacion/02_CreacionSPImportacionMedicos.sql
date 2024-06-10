@@ -52,12 +52,12 @@ BEGIN
 		AND NOT EXISTS(
 		SELECT 1 
 		FROM HospitalGral.Especialidad AS tab
-		WHERE Especialidad = tab.Nombre_Especialidad
+		WHERE Especialidad = tab.Nombre_Especialidad COLLATE Modern_Spanish_CI_AI
 	);
 	
 	INSERT INTO HospitalGral.Medico(id_especialidad, Nombre, Apellido, Nro_Matricula)
 	SELECT 
-		(SELECT id_especialidad FROM HospitalGral.Especialidad AS e WHERE e.Nombre_Especialidad = temp.Especialidad),
+		(SELECT id_especialidad FROM HospitalGral.Especialidad AS e WHERE e.Nombre_Especialidad = temp.Especialidad COLLATE Modern_Spanish_CI_AI),
 		Nombre,
 		DrApellido,
 		Num_Colegiado
@@ -65,8 +65,8 @@ BEGIN
 	WHERE NOT EXISTS(
 		SELECT 1 
 		FROM HospitalGral.Medico AS tab
-		WHERE temp.Num_Colegiado = tab.Nro_Matricula
-		AND (SELECT id_especialidad FROM HospitalGral.Especialidad AS e WHERE e.Nombre_Especialidad = temp.Especialidad) = tab.Nro_Matricula
+		WHERE temp.Num_Colegiado = tab.Nro_Matricula 
+		AND (SELECT id_especialidad FROM HospitalGral.Especialidad AS e WHERE e.Nombre_Especialidad = temp.Especialidad COLLATE Modern_Spanish_CI_AI) = tab.Nro_Matricula
 	)
 
 	DROP TABLE #TempMedicosNuevos;

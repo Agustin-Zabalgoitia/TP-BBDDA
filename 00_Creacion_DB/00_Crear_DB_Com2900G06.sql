@@ -63,8 +63,6 @@ CREATE SCHEMA Turno
 GO
 
 
-
-
 CREATE TABLE HospitalGral.Prestador (
 	id_prestador INT IDENTITY (0,1),
 	Nombre_Prestador NVARCHAR(50) NOT NULL,
@@ -198,7 +196,7 @@ CREATE TABLE Paciente.Estudio (
 GO
 
 CREATE TABLE Paciente.Usuario (
-	id_usuario INT IDENTITY(0,1),
+	id_usuario VARCHAR(9),
 	id_historia_clinica INT NOT NULL,
 	--Las contraseñas se guardan en un hash, el tamaño del mismo depende del algoritmo usado
 	--acá estoy creando un campo para guardar un hash de 16 bytes (MD2, MD4, o MD5)

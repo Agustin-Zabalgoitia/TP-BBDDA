@@ -1,4 +1,4 @@
-use [Com2900_G06]
+use [Com2900G06]
 go
 
 --Alta Paciente.Paciente
@@ -20,7 +20,7 @@ create or alter procedure Paciente.Paciente_Alta
 @Telefono_Laboral nvarchar(16),
 @Fecha_de_Registro date,
 @Fecha_de_Actualizacion date,
-@Usuario_Actualizaci�n int,
+@Usuario_Actualizacion int,
 @id_domicilio int
 as
 declare @campo_error nvarchar(1000);
@@ -46,7 +46,7 @@ begin
 					Telefono_Laboral = @Telefono_Laboral and
 					Fecha_de_Registro = @Fecha_de_Registro and
 					Fecha_de_Actualizacion = @Fecha_de_Actualizacion and
-					Usuario_Actualizaci�n = @Usuario_Actualizaci�n and
+					Usuario_Actualizacion = @Usuario_Actualizacion and
 					id_domicilio = @id_domicilio
 					))
 			throw 60000, 'El registro que quiere insertar ya se encuentra en la base de datos.', 1;
@@ -96,7 +96,7 @@ begin
 		VALUES(	@tipo_documento,@num_documento,@id_cobertura,@Nombre,@Apellido,@Apellido_Materno,
 				@Fecha_De_Nacimiento,@Sexo_Biologico,@Genero,@Nacionalidad,@Foto_perfil,@Mail,
 				@Telefono_Fijo,@Telefono_de_Contacto_Alternativo,@Telefono_Laboral,@Fecha_de_Registro,
-				@Fecha_de_Actualizacion,@Usuario_Actualizaci�n,@id_domicilio);
+				@Fecha_de_Actualizacion,@Usuario_Actualizacion,@id_domicilio);
 	end try
 	begin catch
 		print error_message();
@@ -146,9 +146,9 @@ BEGIN
 		throw 50000, @response, 1
 
 	--Valido que existan las ID's correspondientes
-    if(@campo COLLATE Latin1_General_CI_AS = 'id_cobertura' and not exists (select 1 from Paciente.Cobertura where id_cobertura = convert(int, @valor)))
+    if(@campo COLLATE Modern_Spanish_CI_AI = 'id_cobertura' and not exists (select 1 from Paciente.Cobertura where id_cobertura = convert(int, @valor)))
         throw 50000, 'El paciente no tiene una cobertura valida.', 1
-    if(@campo  COLLATE Latin1_General_CI_AS = 'id_domicilio' and not exists (select 1 from Paciente.Domicilio where id_domicilio = convert(int, @valor)))
+    if(@campo  COLLATE Modern_Spanish_CI_AI = 'id_domicilio' and not exists (select 1 from Paciente.Domicilio where id_domicilio = convert(int, @valor)))
         throw 50000, 'El paciente no tiene un domicilio valido.', 1
 
     --Si no es un numero necesita comillas

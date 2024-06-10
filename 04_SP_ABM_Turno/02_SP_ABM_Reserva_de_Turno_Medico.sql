@@ -1,3 +1,7 @@
+use [Com2900G06]
+go
+
+
 -- Alta
 
 GO
@@ -82,7 +86,7 @@ BEGIN
 		
 		select @tabla = 'Reserva_de_Turno_Medico';
 
-		if not exists(select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = @tabla and COLUMN_NAME = @campo_a_modif collate Latin1_General_CI_AS) 
+		if not exists(select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = @tabla and COLUMN_NAME = @campo_a_modif COLLATE Modern_Spanish_CI_AI) 
 			throw 50001, 'El campo que se quiere modificar no existe, coloce un campo valido.', 1;
 
 	select @SQL = 'UPDATE Turno.Reserva_de_Turno_Medico SET ' + @campo_a_modif + ' = ' + @valor + ' WHERE id_turno = ' + convert(varchar(50), @id_turno)

@@ -7,7 +7,7 @@ AS
 BEGIN
 	--Creo una tabla temporal para hacer el Bulk insert
 	CREATE TABLE #TempSedesNuevas(
-		Sede NVARCHAR(30),
+		Sede NVARCHAR(30) ,
 		Direccion NVARCHAR(50),
 		Localidad NVARCHAR(50),
 		Provincia NVARCHAR(30),
@@ -39,8 +39,8 @@ BEGIN
 	WHERE NOT EXISTS(
 		SELECT 1 
 		FROM HospitalGral.Sede_de_Atencion AS tab
-		WHERE temp.sede = tab.Nombre_de_la_Sede
-		AND temp.Direccion = tab.Direccion_Sede
+		WHERE temp.sede = tab.Nombre_de_la_Sede COLLATE Modern_Spanish_CI_AI
+		AND temp.Direccion = tab.Direccion_Sede COLLATE Modern_Spanish_CI_AI
 	)
 
 	DROP TABLE #TempSedesNuevas;

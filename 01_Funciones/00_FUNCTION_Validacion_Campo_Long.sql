@@ -14,16 +14,16 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 
         FROM INFORMATION_SCHEMA.COLUMNS 
-        WHERE TABLE_NAME = @tabla COLLATE Latin1_General_CI_AS
-        AND COLUMN_NAME = @campo COLLATE Latin1_General_CI_AS
+        WHERE TABLE_NAME = @tabla COLLATE Modern_Spanish_CI_AI
+        AND COLUMN_NAME = @campo COLLATE Modern_Spanish_CI_AI
     )
 		return 'El campo '+ @campo +' no existe';
 
     -- Obt�n la longitud m�xima del campo
     SELECT @maxlen = CHARACTER_MAXIMUM_LENGTH
     FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = @tabla COLLATE Latin1_General_CI_AS
-    AND COLUMN_NAME = @campo COLLATE Latin1_General_CI_AS
+    WHERE TABLE_NAME = @tabla COLLATE Modern_Spanish_CI_AI
+    AND COLUMN_NAME = @campo COLLATE Modern_Spanish_CI_AI
     AND DATA_TYPE IN ('varchar', 'nchar', 'nvarchar');
 
     -- Si la longitud m�xima es NULL, significa que el campo no es de tipo cadena

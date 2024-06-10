@@ -1,4 +1,6 @@
 -- Alta
+USE Com2900G06
+GO
 
 GO
 CREATE OR ALTER PROCEDURE Paciente.Cobertura_Alta @id_prestador int, @imagen_credencial nvarchar(90), @Nro_de_Socio int, @Fecha_de_Registro date
@@ -69,7 +71,7 @@ BEGIN
 		
 		select @tabla = 'Cobertura';
 
-		if not exists(select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = @tabla and COLUMN_NAME = @campo_a_modif collate Latin1_General_CI_AS)
+		if not exists(select 1 from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = @tabla and COLUMN_NAME = @campo_a_modif COLLATE Modern_Spanish_CI_AI)
 			throw 50001, 'El campo a modificar no existe', 1;
 
 		select @response = HospitalGral.validacion_campo_long(@tabla, @campo_a_modif, @response);

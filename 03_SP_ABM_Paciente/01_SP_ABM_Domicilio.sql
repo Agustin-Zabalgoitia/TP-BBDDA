@@ -1,4 +1,4 @@
-use [Com2900_G06]
+use [Com2900G06]
 go
 
 --Alta Paciente.Domicilio
