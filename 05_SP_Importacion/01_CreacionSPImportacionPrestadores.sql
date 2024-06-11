@@ -28,10 +28,11 @@ BEGIN
 
 	EXEC sp_executesql @bulk_insert;
 
-	INSERT INTO HospitalGral.Prestador(Nombre_Prestador,Plan_Prestador)
+	INSERT INTO HospitalGral.Prestador(Nombre_Prestador,Plan_Prestador,logical_drop)
 	SELECT 
 		Prestador,
-		Plan_Prest
+		Plan_Prest,
+		0
 	FROM #TempPrestadorNuevos AS temp
 	WHERE NOT EXISTS(
 		SELECT 1 

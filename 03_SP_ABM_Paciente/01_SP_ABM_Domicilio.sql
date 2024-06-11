@@ -5,7 +5,7 @@ go
 create or alter procedure Paciente.Domicilio_Alta
     @Calle_Nro varchar(51),
 	@Piso int,
-	@Departamento char(1),
+	@Departamento char(2),
 	@Codigo_Postal int,
 	@Pais varchar(51),
 	@Provincia varchar(51),
@@ -28,13 +28,15 @@ begin
 		--Validaciones de campos
 		set @campo_error = ''
 
-		if(len(@Calle_Nro)>50)
-			set @campo_error += '[Num. Calle] ';
-		if(len(@Pais)>50)
+		if(len(@Calle_Nro)>50 OR len(@Calle_Nro)= 0)
+			set @campo_error += '[Calle_Nro] ';
+		if(len(@Departamento)>1 OR len(@Departamento)= 0)
+			set @campo_error += '[Departamento] ';
+		if(len(@Pais)>50 OR len(@Pais)= 0)
 			set @campo_error += '[Pais] ';
-		if(len(@Provincia)>50)
+		if(len(@Provincia)>50 OR len(@Provincia)= 0)
 			set @campo_error += '[Provincia] ';
-		if(len(@Localidad)>50)
+		if(len(@Localidad)>50 OR len(@Localidad)= 0)
 			set @campo_error += '[Localidad] ';
 		set @mensaje_error = 'Los siguientes campos no tienen la longitud adecuada: [ ' + @campo_error + ' ]';
 
@@ -59,7 +61,7 @@ as
 begin
 	begin try
 		if(not exists(select 1 from Paciente.Domicilio where id_domicilio = @id_domicilio))
-			throw 50000, 'El c�digo del domicilio es inexistente', 1;
+			throw 50000, 'El codigo del domicilio es inexistente', 1;
 		delete from Paciente.Domicilio where id_domicilio = @id_domicilio
 	end try
 	begin catch
@@ -86,18 +88,22 @@ begin
 		--Validaciones de campos
 		set @campo_error = ''
 
-		if(len(@Calle_Nro)>50)
-			set @campo_error += '[Num. Calle] ';
-		if(len(@Pais)>50)
+		if(len(@Calle_Nro)>50 OR len(@Calle_Nro)= 0)
+			set @campo_error += '[Calle_Nro] ';
+		if(len(@Departamento)>1 OR len(@Departamento)= 0)
+			set @campo_error += '[Departamento] ';
+		if(len(@Pais)>50 OR len(@Pais)= 0)
 			set @campo_error += '[Pais] ';
-		if(len(@Provincia)>50)
+		if(len(@Provincia)>50 OR len(@Provincia)= 0)
 			set @campo_error += '[Provincia] ';
-		if(len(@Localidad)>50)
+		if(len(@Localidad)>50 OR len(@Localidad)= 0)
 			set @campo_error += '[Localidad] ';
 		set @mensaje_error = 'Los siguientes campos no tienen la longitud adecuada: [ ' + @campo_error + ' ]';
 
 		if(len(@campo_error)>0)
 			throw 50000, @mensaje_error, 1;
+		if not exists( SELECT 1 FROM Paciente.Domicilio WHERE id_domicilio = @id_domicilio)
+			throw 50000, 'El [id_domicilio] no existe', 1;
 
 		--Actualizaci�n de datos
 		update Paciente.Domicilio 

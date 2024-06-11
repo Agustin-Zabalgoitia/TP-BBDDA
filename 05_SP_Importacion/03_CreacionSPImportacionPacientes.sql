@@ -5,6 +5,8 @@ GO
 CREATE OR ALTER PROCEDURE Paciente.Paciente_importar_CSV
 	@path NVARCHAR(150)
 AS
+	declare @estado BIT;
+	declare @fecha_hoy DATE = GETDATE()
 BEGIN
 	--Creo una tabla temporal para hacer el Bulk insert
 	CREATE TABLE #TempPacientesNuevos(
@@ -67,7 +69,9 @@ BEGIN
 
 	-- INSERTA PACIENTES
 
-	INSERT INTO Paciente.Paciente(tipo_documento,num_documento,Nombre, Apellido, Fecha_De_Nacimiento,Sexo_Biologico,Genero,Nacionalidad, Mail,Telefono_Fijo)
+	SET @estado = 0;
+
+	INSERT INTO Paciente.Paciente(tipo_documento,num_documento,Nombre, Apellido, Fecha_De_Nacimiento,Sexo_Biologico,Genero,Nacionalidad, Mail,Telefono_Fijo,logical_drop,Fecha_de_Registro,Fecha_de_Actualizacion)
 	SELECT
 		tipo_documento,
 		num_documento,
@@ -78,7 +82,10 @@ BEGIN
 		Genero,
 		Nacionalidad,
 		Mail,
-		Telefono_Fijo
+		Telefono_Fijo,
+		@estado,
+		@fecha_hoy,
+		@fecha_hoy
 	FROM #TempPacientesNuevos AS temp
 	WHERE NOT EXISTS(
 		SELECT 1
@@ -88,7 +95,7 @@ BEGIN
 	)
 
 	UPDATE Paciente.Paciente
-	SET id_domicilio = id_historia_clinica; --recontra peligroso ¿Modifico la estrategia haciendole un Identity a la temporal y sacandosela a las originales? mmm pero cada vez que ejecuta empieza de 0, NO
+	SET id_domicilio = id_historia_clinica; 
 
 	DROP TABLE #TempPacientesNuevos;
 END	

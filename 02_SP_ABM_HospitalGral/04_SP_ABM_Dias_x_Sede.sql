@@ -40,6 +40,7 @@ BEGIN
 END
 GO
 
+
 --Agregar verificaciones y rango horario
 CREATE OR ALTER PROCEDURE HospitalGral.DiasxSede_Baja
 	@id_medico INT,

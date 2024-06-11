@@ -19,9 +19,9 @@ begin
 		print error_message();
 	end catch
 end
-go
 
 --Baja Turno.Tipo_Turno
+go
 create or alter procedure Turno.Tipo_Turno_Baja 
 @id_tipo_turno int
 as 
@@ -46,6 +46,10 @@ begin
 	begin try
 		if(not exists (select 1 from Turno.Tipo_Turno where id_tipo_turno = @id_tipo_turno))
 			throw 50002, 'No existe un tipo de turno asociado con ese c�digo', 1;
+
+		if exists(select 1 from Turno.Tipo_Turno where Nombre_del_Tipo_de_Turno = @Nombre_Del_Tipo_de_Turno)
+			throw 50003, 'El registro ya existe en la base de datos.', 1;
+
 		if(len(@Nombre_Del_Tipo_de_Turno)=0)
 			throw 50000, 'El nombre no debe estar vacio, Inserte un nombre valido.', 1;
 		if(len(@Nombre_Del_Tipo_de_Turno)<=50)
@@ -59,4 +63,3 @@ begin
 		print error_message();
 	end catch
 end
-go
