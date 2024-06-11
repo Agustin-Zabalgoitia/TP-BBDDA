@@ -51,7 +51,6 @@ GO
 CREATE SCHEMA HospitalGral
 GO
 
-
 --Esquema para agrupar todos los datos relacionados con el paciente, incluyendo:
 --Estudio, usuario, paciente, cobertura, domicilio
 CREATE SCHEMA Paciente
@@ -61,7 +60,6 @@ GO
 --Reserva, estado, tipo, 
 CREATE SCHEMA Turno
 GO
-
 
 CREATE TABLE HospitalGral.Prestador (
 	id_prestador INT IDENTITY (0,1),
@@ -131,9 +129,9 @@ GO
 
 CREATE TABLE Paciente.Cobertura (
 	id_cobertura INT IDENTITY(0,1),
-	id_prestador INT NOT NULL,
-	imagen_credencial NVARCHAR(90),-- (Guardaria la URL) imagen credencial ¿? ni idea de como tendríamos que guardar las imágenes
-	Nro_de_Socio INT NOT NULL,
+	id_prestador INT,
+	imagen_credencial VARCHAR(255),
+	Nro_de_Socio INT CHECK(Nro_de_Socio >= 0) NOT NULL ,
 	Fecha_de_Registro DATE NOT NULL,
 	CONSTRAINT PK_Cobertura_id_cobertura PRIMARY KEY (id_cobertura),
 	CONSTRAINT FK_Cobertura_id_prestador FOREIGN KEY (id_prestador) REFERENCES HospitalGral.Prestador(id_prestador)
@@ -143,9 +141,9 @@ GO
 CREATE TABLE Paciente.Domicilio (
 	id_domicilio INT IDENTITY (0,1),
 	Calle_Nro NVARCHAR(50), --Decision de diseño juntar los campos Calle y Nro
-	Piso INT,
+	Piso INT CHECK (Piso >= 0),
 	Departamento CHAR(1),
-	Codigo_Postal INT,
+	Codigo_Postal INT CHECK (Codigo_Postal >= 0),
 	Pais NVARCHAR(50) NOT NULL,
 	Provincia NVARCHAR(50) NOT NULL,
 	Localidad NVARCHAR(50) NOT NULL,
@@ -156,7 +154,7 @@ GO
 CREATE TABLE Paciente.Paciente (
 	id_historia_clinica INT IDENTITY(0,1),
 	tipo_documento NVARCHAR(50),
-	num_documento NVARCHAR(9),
+	num_documento int CHECK (num_documento >=0),
 	id_cobertura INT ,
 	Nombre NVARCHAR(50) NOT NULL,
 	Apellido NVARCHAR(50) NOT NULL,
@@ -165,7 +163,7 @@ CREATE TABLE Paciente.Paciente (
 	Sexo_Biologico VARCHAR(10) NOT NULL,
 	Genero VARCHAR(10) NOT NULL,
 	Nacionalidad NVARCHAR(50) NOT NULL,
-	Foto_perfil NVARCHAR(90), -- (Tambien la agrego como URL) ¿Añadir foto de perfil? esto no se guarda en sql ni a palos
+	Foto_perfil VARCHAR(255), -- modifiqueeeeee (Tambien la agrego como URL) ¿Añadir foto de perfil? esto no se guarda en sql ni a palos
 	Mail NVARCHAR(50) NOT NULL,
 	Telefono_Fijo NVARCHAR(15),
 	Telefono_de_Contacto_Alternativo NVARCHAR(15),
@@ -174,7 +172,8 @@ CREATE TABLE Paciente.Paciente (
 	Fecha_de_Actualizacion DATE,
 	Usuario_Actualización INT,
 	id_domicilio INT,
-	CONSTRAINT PK_Paciente_id_historia_clinica PRIMARY KEY (id_historia_clinica), -- (Podria ser solo historia clinica no? igual ta bien)
+	Estado_activo BIT,
+	CONSTRAINT PK_Paciente_id_historia_clinica PRIMARY KEY (id_historia_clinica), 
 	CONSTRAINT FK_Paciente_id_cobertura FOREIGN KEY (id_cobertura) REFERENCES Paciente.Cobertura(id_cobertura)
 )
 GO
@@ -183,20 +182,17 @@ CREATE TABLE Paciente.Estudio (
 	id_estudio INT IDENTITY(0,1),
 	id_historia_clinica INT NOT NULL,
 	fecha DATE NOT NULL,
-	Nombre_Estudio NVARCHAR(50) NOT NULL,
+	Nombre_Estudio NVARCHAR(70) NOT NULL,
 	Autorizado BIT NOT NULL,
-	--Tengo dudas sobre lo que se supone que contienen estos dos campos
-	--¿Tienen un texto nada más, o hacen referencia a datos no estructurados?
-	--De momento los voy a dejar con un varchar pero hay que ver que contienen
-	Documento_Resultado NVARCHAR(90),
-	Imagen_Resultado NVARCHAR(90),
+	Documento_Resultado VARCHAR(255) NOT NULL,
+	Imagen_Resultado VARCHAR(255),
 	CONSTRAINT PK_Estudio_id_estudio PRIMARY KEY (id_estudio),
 	CONSTRAINT FK_Estudio_Paciente FOREIGN KEY (id_historia_clinica) REFERENCES Paciente.Paciente(id_historia_clinica)
 )
 GO
 
 CREATE TABLE Paciente.Usuario (
-	id_usuario VARCHAR(9),
+	id_usuario INT NOT NULL CHECK (id_usuario >= 0),
 	id_historia_clinica INT NOT NULL,
 	--Las contraseñas se guardan en un hash, el tamaño del mismo depende del algoritmo usado
 	--acá estoy creando un campo para guardar un hash de 16 bytes (MD2, MD4, o MD5)
@@ -205,7 +201,6 @@ CREATE TABLE Paciente.Usuario (
 	CONSTRAINT PK_Usuario_id_usuario PRIMARY KEY (id_usuario),
 	CONSTRAINT FK_Usuario_Paciente FOREIGN KEY (id_historia_clinica) REFERENCES Paciente.Paciente(id_historia_clinica)
 )
-GO
 
 --Empieza la creación de las tablas en el esquema Turno
 

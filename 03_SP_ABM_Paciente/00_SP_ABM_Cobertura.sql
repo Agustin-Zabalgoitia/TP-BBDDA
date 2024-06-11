@@ -3,13 +3,16 @@ USE Com2900G06
 GO
 
 GO
-CREATE OR ALTER PROCEDURE Paciente.Cobertura_Alta @id_prestador int, @imagen_credencial nvarchar(90), @Nro_de_Socio int, @Fecha_de_Registro date
+CREATE OR ALTER PROCEDURE Paciente.Cobertura_Alta @id_prestador int, @imagen_credencial nvarchar(256), @Nro_de_Socio int, @Fecha_de_Registro date
 AS
 
 BEGIN
 	BEGIN TRY
 		if not exists(select 1 from HospitalGral.Prestador where id_prestador = @id_prestador)
 			throw 50000, 'El id de prestador no existe, no puede darse de alta la cobertura.', 1;
+
+		if(len(@imagen_credencial)>255 OR len(@imagen_credencial)= 0)
+			throw 50002, 'Error en la longitud del campo [imagen_credencial].', 1;
 
 		if(@Fecha_de_Registro < convert(DATE, GETDATE()))
 			throw 50002, 'La fecha de registro de la cobertura no puede ser mas antigua que la del dia de hoy.', 1;
@@ -62,7 +65,7 @@ AS
 	
 	declare @tabla varchar(20);
 	declare @response nvarchar(35);
-	declare @sql nvarchar(100);
+	declare @sql nvarchar(200);
 
 BEGIN
 	BEGIN TRY

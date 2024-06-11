@@ -40,6 +40,16 @@ BEGIN
 END
 GO
 
+SELECT * FROM HospitalGral.Medico
+SELECT * FROM HospitalGral.Sede_de_Atencion
+
+DECLARE @hora_ini TIME = '12:00:00';
+DECLARE @hora_fin TIME = '17:30:00'; --- tendria que validar que esta sea mayor
+
+EXEC HospitalGral.DiasxSede_AltaRango 5,3,'Miércoles', @hora_ini, @hora_fin
+
+SELECT * FROM HospitalGral.Dias_x_Sede
+
 --Agregar verificaciones y rango horario
 CREATE OR ALTER PROCEDURE HospitalGral.DiasxSede_Baja
 	@id_medico INT,

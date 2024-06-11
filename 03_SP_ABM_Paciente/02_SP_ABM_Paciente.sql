@@ -4,7 +4,7 @@ go
 --Alta Paciente.Paciente
 create or alter procedure Paciente.Paciente_Alta
 @tipo_documento nvarchar(51),
-@num_documento nvarchar(9),
+@num_documento int,
 @id_cobertura int,
 @Nombre nvarchar(51),
 @Apellido nvarchar(51),
@@ -13,7 +13,7 @@ create or alter procedure Paciente.Paciente_Alta
 @Sexo_Biologico varchar(11),
 @Genero varchar(11),
 @Nacionalidad nvarchar(51),
-@Foto_perfil nvarchar(91),
+@Foto_perfil varchar(256),
 @Mail nvarchar(51),
 @Telefono_Fijo nvarchar(16),
 @Telefono_de_Contacto_Alternativo nvarchar(16),
@@ -25,29 +25,13 @@ create or alter procedure Paciente.Paciente_Alta
 as
 declare @campo_error nvarchar(1000);
 declare @mensaje_error nvarchar(1000);
+declare @estado BIT;
 begin
 	begin try
 		--Registro duplicado
 		if(exists (select 1 from Paciente.Paciente where 
 					tipo_documento = @tipo_documento and
-					num_documento = @num_documento and
-					id_cobertura = @id_cobertura and
-					Nombre = @Nombre and
-					Apellido = @Apellido and
-					Apellido_Materno = @Apellido_Materno and
-					Fecha_De_Nacimiento = @Fecha_De_Nacimiento and
-					Sexo_Biologico = @Sexo_Biologico and
-					Genero = @Genero and
-					Nacionalidad = @Nacionalidad and
-					Foto_perfil = @Foto_perfil and
-					Mail = @Mail and
-					Telefono_Fijo = @Telefono_Fijo and
-					Telefono_de_Contacto_Alternativo = @Telefono_de_Contacto_Alternativo and
-					Telefono_Laboral = @Telefono_Laboral and
-					Fecha_de_Registro = @Fecha_de_Registro and
-					Fecha_de_Actualizacion = @Fecha_de_Actualizacion and
-					Usuario_Actualizacion = @Usuario_Actualizacion and
-					id_domicilio = @id_domicilio
+					num_documento = @num_documento 
 					))
 			throw 60000, 'El registro que quiere insertar ya se encuentra en la base de datos.', 1;
 
@@ -62,8 +46,6 @@ begin
 		--Validaci�n de formatos
 		if(len(@tipo_documento)>50 or len(@tipo_documento)=0)
 			set @campo_error += ('[Tipo documento]'+ char(10));
-		if(len(@num_documento)>8 or len(@num_documento)=0)
-			set @campo_error += ('[num. documento]'+ char(10));
 		if(len(@Nombre)>50 or len(@Nombre)=0)
 			set @campo_error += ('[Nombre]'+ char(10));
 		if(len(@Apellido)>50 or len(@Apellido)=0)
@@ -76,7 +58,7 @@ begin
 			set @campo_error += ('[Genero]'+ char(10));
 		if(len(@Nacionalidad)>50 or len(@Nacionalidad)=0)
 			set @campo_error += ('[Nacionalidad]'+ char(10));
-		if(len(@Foto_perfil)>90 or len(@Foto_perfil)=0)
+		if(len(@Foto_perfil)>255 or len(@Foto_perfil)=0)
 			set @campo_error += ('[Foto perfil]'+ char(10));
 		if(len(@Mail)>50 or len(@Mail)=0)
 			set @campo_error += ('[Mail]'+ char(10));
@@ -92,11 +74,13 @@ begin
 		if(len(@campo_error)>0)
 			throw 50000, @mensaje_error, 1;
 
+		SET @estado = 1;
+
 		INSERT INTO Paciente.Paciente
 		VALUES(	@tipo_documento,@num_documento,@id_cobertura,@Nombre,@Apellido,@Apellido_Materno,
 				@Fecha_De_Nacimiento,@Sexo_Biologico,@Genero,@Nacionalidad,@Foto_perfil,@Mail,
 				@Telefono_Fijo,@Telefono_de_Contacto_Alternativo,@Telefono_Laboral,@Fecha_de_Registro,
-				@Fecha_de_Actualizacion,@Usuario_Actualizacion,@id_domicilio);
+				@Fecha_de_Actualizacion,@Usuario_Actualizacion,@id_domicilio,@estado);
 	end try
 	begin catch
 		print error_message();
@@ -112,8 +96,8 @@ begin
 	begin try
 		--Valido la existencia del paciente
 		if(not exists(select 1 from Paciente.Paciente where id_historia_clinica = @id_historia_clinica))
-			throw 50000, 'El c�digo ingresado no existe', 1;
-		delete from Paciente.Paciente where id_historia_clinica = @id_historia_clinica
+			throw 50000, 'El codigo ingresado no existe', 1;
+		UPDATE Paciente.Paciente SET Estado_activo = 0 where id_historia_clinica = @id_historia_clinica
 	end try
 	begin catch
 		print error_message();
@@ -123,50 +107,57 @@ go
 
 --Modificacion Paciente.Paciente
 CREATE OR ALTER PROCEDURE Paciente.Paciente_Modificacion
-    @id_historia_clinica int,
+    @id_historia_clinica INT,
     @campo NVARCHAR(50),
     @valor NVARCHAR(55)
 AS
-
     DECLARE @sql NVARCHAR(500);
-	DECLARE @tabla varchar(20);
-	DECLARE @response nvarchar(35);
+    DECLARE @tabla NVARCHAR(20);
+    DECLARE @schema NVARCHAR(20);
+    DECLARE @response NVARCHAR(35);
 BEGIN
-	begin try
-	
-	--Valido la existencia del paciente
-	if(not exists(select 1 from Paciente.Paciente where id_historia_clinica = @id_historia_clinica))
-		throw 50000, 'El codigo ingresado no existe', 1;
+    BEGIN TRY
+    
+    --Valido la existencia del paciente
+    IF(NOT EXISTS(SELECT 1 FROM Paciente.Paciente WHERE id_historia_clinica = @id_historia_clinica))
+        THROW 50000, 'El codigo ingresado no existe', 1;
 
-	set @tabla = 'Paciente';
-	set @response = HospitalGral.validacion_campo_long(@tabla, @campo, @valor);
+	if((not exists (select 1 from Paciente.Cobertura where id_cobertura = @valor))AND  'id_cobertura' = @campo )
+			throw 50000, 'El paciente no tiene una cobertura valida.', 1
+		if((not exists (select 1 from Paciente.Domicilio where id_domicilio = @valor)) AND  'id_domicilio' = @campo )
+			throw 50000, 'El paciente no tiene un domicilio valido.', 1
 	
-	--Valido si el campo es valido y si la longitud es la adecuada
-	if(@response is not null)
-		throw 50000, @response, 1
 
-	--Valido que existan las ID's correspondientes
-    if(@campo COLLATE Modern_Spanish_CI_AI = 'id_cobertura' and not exists (select 1 from Paciente.Cobertura where id_cobertura = convert(int, @valor)))
-        throw 50000, 'El paciente no tiene una cobertura valida.', 1
-    if(@campo  COLLATE Modern_Spanish_CI_AI = 'id_domicilio' and not exists (select 1 from Paciente.Domicilio where id_domicilio = convert(int, @valor)))
-        throw 50000, 'El paciente no tiene un domicilio valido.', 1
+    SET @tabla = 'Paciente';
+    SET @response = HospitalGral.validacion_campo_long(@tabla, @campo, @valor);
+    
+    --Valido si el campo es valido y si la longitud es la adecuada
+    IF(@response is NOT null)
+        THROW 50000, @response, 1
 
     --Si no es un numero necesita comillas
-	if(@campo not in ('id_cobertura', 'id_domicilio'))
-		set @valor = '''' + @valor + '''';
+    IF(@campo NOT in ('id_cobertura', 'id_domicilio'))
+        SET @valor = '''' + @valor + '''';
 
-	--Armo la query correspondiente
-    SET @sql =	'UPDATE Paciente.Paciente SET ' + 
-				@campo + ' = ' + convert(nvarchar(55), @valor) + 
-				' where id_historia_clinica = ' + convert(varchar(50), @id_historia_clinica);
+    --Armo la query correspondiente
+    SET @sql =    'UPDATE Paciente.Paciente SET ' + 
+                @campo + ' = ' + convert(NVARCHAR(55), @valor) + 
+                ' WHERE id_historia_clinica = ' + convert(varchar(50), @id_historia_clinica);
 
-    -- Ejecutar el SQL din�mico (print es para testeo)
-	--print @sql
-	execute sp_executesql @sql;
+    -- Ejecutar el SQL dinomico (PRINT es para testeo)
+    --PRINT @sql
+    execute sp_executesql @sql;
 
-	end try
-	begin catch
-		print error_message();
-	end catch
+    END TRY
+    BEGIN CATCH
+        IF ERROR_NUMBER() = 547 -- 547 es el error relacionado con constraINT violations, incluyENDo las foreign keys
+        BEGIN
+            DECLARE @errormessage nvarchar (50)
+            SET @errormessage = ('El codigo ingresado para '+ SUBSTRING(@campo, CHARINDEX('id_', @campo) + LEN('id_'), LEN(@campo) )+' no existe');
+            PRINT @errormessage
+        END
+    ELSE
+        PRINT error_message();
+    END CATCH
 END
 GO

@@ -5,8 +5,11 @@ go
 -- Alta
 
 GO
-CREATE OR ALTER PROCEDURE Turno.Reserva_de_Turno_Medico_Alta @id_historia_clinica INT, @id_estado_turno INT, @id_tipo_turno INT, @id_medico INT, @id_sede INT, @id_especialidad INT, @Fecha DATE, @Hora TIME
+CREATE OR ALTER PROCEDURE Turno.Reserva_de_Turno_Medico_Alta @id_historia_clinica INT, @id_tipo_turno INT, @id_medico INT, @id_sede INT, @id_especialidad INT, @Fecha DATE, @Hora TIME
 AS
+	DECLARE @Dia_Semana NVARCHAR(10);
+	DECLARE @Dia_Semana_esp NVARCHAR(10);
+	DECLARE @id_estado_turno INT
 BEGIN
 	
 	BEGIN TRY
@@ -31,14 +34,35 @@ BEGIN
 	/* Si estoy aca es porque el medico atiene en esa sede, y ademas tiene la especialidad que yo quiero, queda ver si la fecha y hora coinciden, y si no tengo otro turno ya previo
 	para ese medico, en esa sede, con esa especialidad a esa fecha y hora. */
 
+	/*
 	if not exists(select 1 from HospitalGral.Dias_x_Sede where id_medico = @id_medico and id_sede = @id_sede and (Hora_Inicio < @hora)) -- No puedo poner una hora < a la hora en la que el medico comienza a atender.
 		throw 50004, 'El medico en esa sede a ese horario aun no comenzo su turno laboral, no se puede dar de alta la reserva del turno medico.', 1;
-	
+	*/--- A lo sumo verificar si es el primero o el ultimo 
+
+	SET @Dia_Semana = DATENAME(WEEKDAY, @fecha);
+
+
+	SET @Dia_Semana_esp =
+    CASE @Dia_Semana
+        WHEN 'Monday' THEN 'Lunes'
+        WHEN 'Tuesday' THEN 'Martes'
+        WHEN 'Wednesday' THEN 'Miércoles'
+        WHEN 'Thursday' THEN 'Jueves'
+        WHEN 'Friday' THEN 'Viernes'
+        WHEN 'Saturday' THEN 'Sábado'
+        WHEN 'Sunday' THEN 'Domingo'
+    END;
+
+	if not exists(SELECT 1 FROM HospitalGral.Dias_x_Sede WHERE id_medico = @id_medico AND id_sede = @id_sede AND Dia = @Dia_Semana_esp AND Hora_Inicio = @Hora)
+		throw 50000, 'El horario especificado no es uno de los turnos preestablecidos para asignar', 1;
+
 	/* Si todo lo demas se cumplio, solo queda ver si tengo un turno para esa fecha en esa hora/intervalo de tiempo previo, en cuyo caso no podria dar de alta el turno */
 	-- No esta contemplado el intervalo de tiempo todavia.
 
 	if exists(select 1 from Turno.Reserva_de_Turno_Medico where id_medico = @id_medico and id_sede = @id_sede and fecha = @fecha and hora = @hora and (select 1 from Turno.Reserva_de_Turno_Medico where fecha = @fecha and hora = @hora and id_estado_turno = 3) = 1)
 		throw 50005, 'En esa fecha y hora el medico en esa sede ya se encuentra ocupado, no se puede dar de alta la reserval del turno medico.', 1;
+
+	SET @id_estado_turno = 3;
 
 	INSERT INTO Turno.Reserva_de_Turno_Medico VALUES (@id_historia_clinica, @id_estado_turno, @id_tipo_turno, @id_medico, @id_sede, @id_especialidad, @Fecha, @Hora);
 	END TRY
@@ -47,10 +71,9 @@ BEGIN
 		print error_message();
 	END CATCH
 END;
+GO
 
 -- Baja
-
-GO
 CREATE OR ALTER PROCEDURE Turno.Reserva_de_Turno_Medico_Baja @id_turno int
 AS
 BEGIN
@@ -69,10 +92,9 @@ BEGIN
 	END CATCH
 
 END
+GO
 
 -- Modificacion
-
-GO
 CREATE OR ALTER PROCEDURE Turno.Reserva_de_Turno_Medico_Modificacion @campo_a_modif varchar(20), @valor varchar(50), @id_turno int
 AS
 	
